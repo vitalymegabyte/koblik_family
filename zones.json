@@ -1,0 +1,10 @@
+{
+    "Зона 1": {
+        "rtspstream": "rtsp://localhost:8554/mystream",
+        "side": "left"
+    },
+    "Зона 2": {
+        "rtspstream": "rtsp://localhost:8554/mystream",
+        "side": "right"
+    }
+}
