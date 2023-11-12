@@ -10,8 +10,8 @@ import datetime
 
 torch.set_num_threads(1)
 
-CHECKPOINT = 'best_acc_top1_epoch_3.pth'
-CONFIG = "mvit_koblik_224_16_5sec.py"
+CHECKPOINT = 'best_acc_top1_epoch_4.pth'
+CONFIG = "mvit_koblik_224_24_5sec.py"
 WATCH_DIR = "train_5s"
 OUTPUT_FILE = "predicts.csv"
 DEVICE = "cpu"
