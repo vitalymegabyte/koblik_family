@@ -1,11 +1,15 @@
 import telebot
 import time
+import os
+from dotenv import load_dotenv
 from threading import Thread
 from virtual_db import VirtualDB
 from inotify.adapters import Inotify
 
+load_dotenv()
+
 bot = telebot.TeleBot(
-    "KEY", parse_mode=None
+    os.environ['TG_KEY'], parse_mode=None
 )  # You can set parse_mode by default. HTML or MARKDOWN
 
 db = VirtualDB()

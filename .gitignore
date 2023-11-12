@@ -3,3 +3,4 @@ train_5s/
 ./*.csv
 db.json
 *.pth
+.env
