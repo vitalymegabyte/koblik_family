@@ -15,6 +15,7 @@ CONFIG = "mvit_koblik_224_24_5sec.py"
 WATCH_DIR = "train_5s"
 OUTPUT_FILE = "predicts.csv"
 DEVICE = "cpu"
+LOADOUT_LOOP_TIME = 600
 
 lbls_classes = {0: 'простой', 1: 'вынужденная', 2: 'сварка'}
 
@@ -102,7 +103,7 @@ def loadout():
 def loadout_thread():
     while True:
         # сохраняем раз в 10 минут
-        time.sleep(600)
+        time.sleep(LOADOUT_LOOP_TIME)
         loadout()
 
 
