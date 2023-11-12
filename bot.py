@@ -5,7 +5,7 @@ from virtual_db import VirtualDB
 from inotify.adapters import Inotify
 
 bot = telebot.TeleBot(
-    "6971588556:AAF_dREk1DHdWVLJVEbELRIZu8kD6Xi9luQ", parse_mode=None
+    "KEY", parse_mode=None
 )  # You can set parse_mode by default. HTML or MARKDOWN
 
 db = VirtualDB()
