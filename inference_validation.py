@@ -12,8 +12,8 @@ from sklearn.metrics import confusion_matrix
 from sklearn.metrics import ConfusionMatrixDisplay
 
 
-CHECKPOINT = 'best_acc_top1_epoch_3.pth'
-CONFIG = "mvit_koblik_224_16_5sec.py"
+CHECKPOINT = 'best_acc_top1_epoch_4.pth'
+CONFIG = "mvit_koblik_224_24_5sec.py"
 DATASET_DIR = "train_5s"
 OUTPUT_FILE = "predicts.csv"
 DEVICE = "cpu"

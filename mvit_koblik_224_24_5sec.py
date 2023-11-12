@@ -19,8 +19,8 @@ model = dict(
         type='MViTHead',
         in_channels=768,
         num_classes=3,
-        label_smooth_eps=0.1,
-        dropout_ratio=0.5,
+        label_smooth_eps=0.2,
+        dropout_ratio=0.65,
         average_clips='prob'))
 
 # Logging settings
@@ -57,86 +57,54 @@ ann_file_test = './ann_test.txt'
 
 train_pipeline = [
     dict(type='DecordInit', io_backend='disk'),
-    # dict(
-    #     type='SampleFrames',
-    #     clip_len=32,
-    #     frame_interval=2,
-    #     num_clips=1,
-    #     out_of_bound_opt='repeat_last'),
-    dict(type='UniformSample', clip_len=16, test_mode=False),
+
+    dict(type='UniformSample', clip_len=24, test_mode=False),
     dict(type='DecordDecode'),
 
-    # dict(type='Resize', scale=(224, 224)),
-    # dict(type='Flip', flip_ratio=0.5, direction='horizontal'),
-
-    # dict(type='Resize', scale=(-1, 180)), #256
-    # dict(type='RandomResizedCrop'),
-    # dict(type='Resize', scale=(160, 160), keep_ratio=False), #(224, 224)
-
-    dict(type='Resize', scale=(224, 224), keep_ratio=False),
-    dict(type='RandomResizedCrop', area_range=(0.7, 1.0)),
-    
+    dict(type='RandomRescale', scale_range=(160, 288)),
+    dict(type='RandomResizedCrop', area_range=(0.5, 1.0)),
     dict(type='Resize', scale=(224, 224), keep_ratio=False),
 
     dict(type='Flip', flip_ratio=0.5, direction='horizontal'),
+    dict(type='Flip', flip_ratio=0.5, direction='vertical'),
+
     dict(
         type='PytorchVideoWrapper',
         op='RandAugment',
         magnitude=8,
         num_layers=4,
         prob=0.8),
-    dict(type='RandomErasing', erase_prob=0.2, mode='rand'),
+
+    dict(type='RandomErasing', erase_prob=0.3, mode='rand'),
 
     dict(type='FormatShape', input_format='NCTHW'),
     dict(type='PackActionInputs')
 ]
 val_pipeline = [
     dict(type='DecordInit', io_backend='disk'),
-    # dict(
-    #     type='SampleFrames',
-    #     clip_len=32,
-    #     frame_interval=2,
-    #     num_clips=1,
-    #     test_mode=True,
-    #     out_of_bound_opt='repeat_last'),
-    dict(type='UniformSample', clip_len=16, test_mode=True),
+
+    dict(type='UniformSample', clip_len=24, test_mode=True),
     dict(type='DecordDecode'),
-    
-    # dict(type='Resize', scale=(224, 224)),
-    # dict(type='Resize', scale=(-1, 180)),
-    # dict(type='CenterCrop', crop_size=160),
 
     dict(type='Resize', scale=(224, 224), keep_ratio=False),
-    # dict(type='CenterCrop', crop_size=224),
 
     dict(type='FormatShape', input_format='NCTHW'),
     dict(type='PackActionInputs')
 ]
 test_pipeline = [
     dict(type='DecordInit', io_backend='disk'),
-    # dict(
-    #     type='SampleFrames',
-    #     clip_len=32,
-    #     frame_interval=2,
-    #     num_clips=1,
-    #     test_mode=True,
-    #     out_of_bound_opt='repeat_last'),
-    dict(type='UniformSample', clip_len=16, test_mode=True),
+
+    dict(type='UniformSample', clip_len=24, test_mode=True),
     dict(type='DecordDecode'),
 
-    # dict(type='Resize', scale=(224, 224)),
-    # dict(type='Resize', scale=(-1, 180)),
-    # dict(type='CenterCrop', crop_size=160),
-
     dict(type='Resize', scale=(224, 224), keep_ratio=False),
-    # dict(type='CenterCrop', crop_size=224),
 
     dict(type='FormatShape', input_format='NCTHW'),
     dict(type='PackActionInputs')
 ]
 
 train_dataloader = dict(
-    batch_size=40, #90
+    batch_size=20,
     num_workers=8,
     persistent_workers=True,
     sampler=dict(type='DefaultSampler', shuffle=True),
@@ -146,7 +114,7 @@ train_dataloader = dict(
         data_prefix=dict(video=data_root),
         pipeline=train_pipeline))
 val_dataloader = dict(
-    batch_size=16,
+    batch_size=8,
     num_workers=8,
     persistent_workers=True,
     sampler=dict(type='DefaultSampler', shuffle=False),
@@ -173,30 +141,30 @@ test_dataloader = dict(
 val_evaluator = dict(type='AccMetric')
 test_evaluator = dict(type='AccMetric')
 train_cfg = dict(
-    type='EpochBasedTrainLoop', max_epochs=150, val_begin=1, val_interval=1) #65
+    type='EpochBasedTrainLoop', max_epochs=4, val_begin=1, val_interval=1) #65
 val_cfg = dict(type='ValLoop')
 test_cfg = dict(type='TestLoop')
 
-base_lr = 2e-4 # 0.0016 # 1e-4
+base_lr = 6e-5 # 0.0016 # 1e-4
 optim_wrapper = dict(
     optimizer=dict(
         type='AdamW', lr=base_lr, betas=(0.9, 0.999), weight_decay=0.05),
     paramwise_cfg=dict(norm_decay_mult=0.0, bias_decay_mult=0.0))
 
 param_scheduler = [
-    dict(
-        type='LinearLR',
-        start_factor=0.1,
-        by_epoch=True,
-        begin=0,
-        end=5,
-        convert_to_iter_based=True),
+    # dict(
+    #     type='LinearLR',
+    #     start_factor=0.1,
+    #     by_epoch=True,
+    #     begin=0,
+    #     end=5,
+    #     convert_to_iter_based=True),
     dict(
         type='CosineAnnealingLR',
-        T_max=10,
-        eta_min=base_lr / 20,
+        T_max=2,
+        eta_min=base_lr / 3,
         by_epoch=True,
-        begin=5,
+        begin=0,
         end=200,
         convert_to_iter_based=True)
 ]
@@ -205,7 +173,7 @@ auto_scale_lr = dict(enable=False, base_batch_size=64)
 
 dist_params = dict(backend='nccl')
 launcher = 'pytorch'
-work_dir = 'work_dirs/mvit_koblik_224_16_5sec'
+work_dir = 'work_dirs/mvit_koblik_224_32_5sec'
 randomness = dict(seed=None, diff_rank_seed=False, deterministic=False)
 
 load_from = 'https://download.openmmlab.com/mmaction/v1.0/recognition/mvit/converted/mvit-small-p244_16x4x1_kinetics400-rgb_20221021-9ebaaeed.pth'
