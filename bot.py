@@ -17,6 +17,8 @@ db = VirtualDB()
 
 # когда вышли новые отчёты -- отправляем их
 def send_thread():
+    if not os.path.exists('common_result.csv'):
+        os.system('touch common_result.csv')
     inotify = Inotify()
     inotify.add_watch('common_result.csv')
 
